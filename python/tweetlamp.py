@@ -57,6 +57,13 @@ def get_last_tweet(user):
     except KeyError:
         return u''
 
+
+def get_status():
+    arduino.write('S')
+    status = arduino.read()
+    return status
+
+
 if arduino_version.lower() == 'uno':
     usb_wildcard = '/dev/ttyACM*'
 else:
@@ -69,7 +76,7 @@ if len(serial_ports) == 0:
 
 serial_port = serial_ports[0]
 arduino = serial.Serial(serial_port, baud_rate, timeout=0.1)
-arduino.write('   ')
+arduino.write('     ')
 
 while True:
     try:
@@ -77,15 +84,17 @@ while True:
         sys.stdout.flush()
         last_tweet = get_last_tweet(twitter_username)
         if not last_tweet:
-            print 'Got nothing!'
+            print 'Got nothing!',
         elif u'lâmpada on' in last_tweet[0]:
             turn_light_on()
-            print 'Light -> ON (by @%s)' % last_tweet[1]
+            print 'Light -> ON (by @%s)' % last_tweet[1],
         elif u'lâmpada off' in last_tweet[0]:
             turn_light_off()
-            print 'Light -> OFF (by @%s)' % last_tweet[1]
+            print 'Light -> OFF (by @%s)' % last_tweet[1],
         else:
-            print 'nothing to do' 
+            print 'nothing to do',
+        status = get_status()
+        print '[status = %s]' % ('ON' if status else 'OFF')
         time.sleep(5)
     except KeyboardInterrupt:
         break

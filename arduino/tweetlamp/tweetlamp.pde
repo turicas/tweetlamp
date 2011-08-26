@@ -2,6 +2,7 @@
 
 void setup() {
   pinMode(RELAY_MODULE, OUTPUT); //set the digital pin where the realy module is connected to output
+  digitalWrite(RELAY_MODULE, LOW);
   Serial.begin(9600); //start the serial communication with the PC/Python software
 }
 
@@ -15,6 +16,9 @@ void loop() {
     else if (c == 'L') {
       digitalWrite(RELAY_MODULE, LOW); //turn off
     } 
+    else if (c == 'S') {
+      Serial.print(digitalRead(RELAY_MODULE));
+    }
     //else -> ignores the character received
   }
 }

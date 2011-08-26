@@ -6,13 +6,17 @@
 
 import urllib2 #[Twitter] Used to get Twitter timeline page
 import json    #[Twitter] Used to unpack JSON (returned from Twitter) as a Python dictionary
+import time    #[Twitter] Used to change the URL you get every time (to avoid proxy/caches)
 import glob    #[Arduino-communication] Used to search for available serial connections (on GNU/Linux)
 import serial  #[Arduino-communication] Used to communicate with Arduino
 import time    #[Arduino-communication] Used to sleep!
 import sys     #[CLI] Used to refresh (flush) stdout
 
 
-twitter_username = 'EuArduino'
+twitter_username = 'CursoDeArduino'
+arduino_version = 'Uno'
+baud_rate = 9600
+
 
 def turn_light_on():
     arduino.write('H')
@@ -27,7 +31,7 @@ def get_last_tweet(user):
     #timeline_as_json_url = 'http://twitter.com/statuses/user_timeline/%s.json' % user
     #Use the URL above if do you want to obey tweets of only one owner
     # (need to change 'results' code below)
-    search_url = 'http://search.twitter.com/search.json?q=@' + user
+    search_url = 'http://search.twitter.com/search.json?q=@%s&timestamp=%f' % (user, time.time())
 
     try:
         fp = urllib2.urlopen(search_url)
@@ -53,14 +57,18 @@ def get_last_tweet(user):
     except KeyError:
         return u''
 
-
-serial_ports = glob.glob('/dev/ttyUSB*')
+if arduino_version.lower() == 'uno':
+    usb_wildcard = '/dev/ttyACM*'
+else:
+    usb_wildcard = '/dev/ttyUSB*'
+    
+serial_ports = glob.glob(usb_wildcard)
 if len(serial_ports) == 0:
         print 'No serial ports available'
         exit(1)
 
 serial_port = serial_ports[0]
-arduino = serial.Serial(serial_port, 9600, timeout=0.1)
+arduino = serial.Serial(serial_port, baud_rate, timeout=0.1)
 arduino.write('   ')
 
 while True:

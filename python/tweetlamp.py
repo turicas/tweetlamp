@@ -53,15 +53,19 @@ def get_last_tweet(user):
         if 'text' not in tweets[0]:
             return u''
 
-        return tweets[0]['text'], tweets[0]['from_user']
+        return tweets[0]
     except KeyError:
         return u''
 
 
 def get_status():
     arduino.write('S')
-    status = arduino.read()
-    return status
+    arduino.flush()
+    status_now = arduino.read()
+    try:
+        return int(status_now)
+    except ValueError:
+        return 0
 
 
 if arduino_version.lower() == 'uno':
@@ -85,12 +89,12 @@ while True:
         last_tweet = get_last_tweet(twitter_username)
         if not last_tweet:
             print 'Got nothing!',
-        elif u'lâmpada on' in last_tweet[0]:
+        elif u'lâmpada on' in last_tweet['text']:
             turn_light_on()
-            print 'Light -> ON (by @%s)' % last_tweet[1],
-        elif u'lâmpada off' in last_tweet[0]:
+            print 'Light -> ON (by @%s)' % last_tweet['from_user'],
+        elif u'lâmpada off' in last_tweet['text']:
             turn_light_off()
-            print 'Light -> OFF (by @%s)' % last_tweet[1],
+            print 'Light -> OFF (by @%s)' % last_tweet['from_user'],
         else:
             print 'nothing to do',
         status = get_status()

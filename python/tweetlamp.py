@@ -27,11 +27,13 @@ def turn_light_off():
     arduino.write('L')
     arduino.flush()
 
-def get_last_tweet(user):
+def get_last_tweet(user, query_string=None):
     #timeline_as_json_url = 'http://twitter.com/statuses/user_timeline/%s.json' % user
     #Use the URL above if do you want to obey tweets of only one owner
     # (need to change 'results' code below)
-    search_url = 'http://search.twitter.com/search.json?q=@%s&timestamp=%f' % (user, time.time())
+    if not query_string:
+        query_string = 'q=@%s&timestamp=%f' % (user, time.time())
+    search_url = 'http://search.twitter.com/search.json?%s' % query_string
 
     try:
         fp = urllib2.urlopen(search_url)
@@ -52,7 +54,7 @@ def get_last_tweet(user):
     try:
         if 'text' not in tweets[0]:
             return u''
-
+        tweets[0]['refresh_url'] = info['refresh_url']
         return tweets[0]
     except KeyError:
         return u''

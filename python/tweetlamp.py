@@ -67,7 +67,7 @@ def get_status():
     try:
         return int(status_now)
     except ValueError:
-        return 0
+        return None
 
 
 if arduino_version.lower() == 'uno':
@@ -86,21 +86,28 @@ arduino.write('     ')
 
 while True:
     try:
-        print 'Updating... ',
+        print 'Updating...',
         sys.stdout.flush()
         last_tweet = get_last_tweet(twitter_username)
         if not last_tweet:
             print 'Got nothing!',
         elif u'lâmpada on' in last_tweet['text']:
             turn_light_on()
-            print 'Light -> ON (by @%s)' % last_tweet['from_user'],
+            print 'Light -> ON (by @%s at %s)' % (last_tweet['from_user'], last_tweet['created_at']),
         elif u'lâmpada off' in last_tweet['text']:
             turn_light_off()
-            print 'Light -> OFF (by @%s)' % last_tweet['from_user'],
+            print 'Light -> OFF (by @%s at %s)' % (last_tweet['from_user'], last_tweet['created_at']),
         else:
             print 'nothing to do',
+
         status = get_status()
-        print '[status = %s]' % ('ON' if status else 'OFF')
+        if status is None:
+            status_as_string = 'undefined'
+        elif not status:
+            status_as_string = 'OFF'
+        else:
+            status_as_string = 'ON'
+        print '[status = %s]' % status_as_string
         time.sleep(5)
     except KeyboardInterrupt:
         break
